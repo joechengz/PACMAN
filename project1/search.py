@@ -164,8 +164,15 @@ def uniformCostSearch(problem):
         visited.append(state)
         
         
-        if state not in visited:
-            visited.append(state)
+        if state in visited:
+            continue
+        
+        
+        visited.append(state)
+        
+        
+        #if state not in visited:
+        #   visited.append(state)
         for newstate,newpath,cost in problem.getSuccessors(state):
             if newstate not in visited:
                 fringe.push((newstate,path+[newpath]),cost+problem.getCostOfActions(path))
