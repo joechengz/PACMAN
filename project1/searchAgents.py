@@ -373,15 +373,14 @@ def cornersHeuristic(state, problem):
             cornersLeft.append(corners[i])
     
     while(len(cornersLeft)!=0): 
-        for corner in cornersLeft:
-            dist = [util.manhattanDistance(curPos,corner)]
+        distances = [util.manhattanDistance(curPos,cornerLeft) for cornerLeft in cornersLeft]
+        minDist = min(distances)
+        index = distances.index(minDist)
         
-        distres = min(dist)
-        index = dist.index(distres)
+        middle_corner = cornersLeft[index]
+        cornersLeft.remove(middle_corner)
         
-        curPos = cornersLeft[index]
-        cornersLeft.remove(cornersLeft[index])
-        res += distres       
+        res+=minDist   
     
 
     return res# Default to trivial solution
