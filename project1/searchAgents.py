@@ -374,7 +374,7 @@ def cornersHeuristic(state, problem):
                      
             
     
-    minEdge = min((walls.height -2),(walls.width-2))-1
+    minEdge = min((corners[1][1]-1),(corners[2][0]-1))
     other_corners = 3*minEdge
     
     for s in state[0]:
