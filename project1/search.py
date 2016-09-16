@@ -159,16 +159,18 @@ def uniformCostSearch(problem):
     
     while not fringe.isEmpty():
         state,path = fringe.pop()
-        if problem.isGoalState(state):
-            return path
-        visited.append(state)
-        
         
         if state in visited:
             continue
-        
-        
+            
+            
         visited.append(state)
+                       
+            
+        if problem.isGoalState(state):
+            return path
+        
+        
         
         
         #if state not in visited:
@@ -177,7 +179,7 @@ def uniformCostSearch(problem):
             if newstate not in visited:
                 fringe.push((newstate,path+[newpath]),cost+problem.getCostOfActions(path))
                 visited.append(newstate)
-        return None
+        #return None
                 
                 
                  
