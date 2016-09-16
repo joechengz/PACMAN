@@ -463,7 +463,7 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     walls = set(problem.walls.asList())
-    position, foodGrid = state
+    #position, foodGrid = state
     x, y = position
     foodGrid = foodGrid.asList()
     if foodGrid:
@@ -514,6 +514,7 @@ def foodHeuristic(state, problem):
             total_food += 1
 
         return max(dists) + distance + wall_cost + total_food
+    return 0
     
     
     
