@@ -363,39 +363,28 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    distance = 0
-    cornersLeft = list(state[2])
-    pacman = state[1]
-    closest = 0
-    cornersList = []
-    minI = 0
-    distance_to_nearest = 0
-    total = 0
+    totalDistanceHeuristic = 0
     
-    if len(cornersLeft) > 0:
-        for i in range(len(cornersLeft)):
-            corner = cornersLeft[i]
-            cornersList.append(abs(pacman[0] - corner[0]) + abs(pacman[1] - corner[1]))
-        distance_to_nearest = min(cornersList)      
-        minI = cornersList.index(distance_to_nearest)
-        closest = cornersLeft[minI]
-      
-        cornersLeft.remove(closest)
-        while len(cornersLeft) > 0:
-          distanceList = []
-          xy1 = closest
-          for i in range(len(cornersLeft)):
-              xy2 = cornersLeft[i]
-              distanceList.append(abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1]))
-          closest2 = min(distanceList)
-          minI = distanceList.index(closest2)
-          closest = cornersLeft[minI]
-          cornersLeft.remove(closest)
-          
-          total = total + closest2
-        distance = distance_to_nearest + total
-      
-    return distance # Default to trivial solution
+    currentPosition = state[1]
+    cornersVisited = state[0]
+    cornersLeft = []
+    for i in range(len(corners)):
+        if not cornersVisited[i]:
+            cornersLeft.append(corners[i])
+    
+    while(len(cornersLeft) != 0):
+        distances = [util.manhattanDistance(currentPosition,cornerLeft) for cornerLeft in cornersLeft]
+        minDistanceToFirstCorner = min(distances)
+        cornerIndex = distances.index(minDistanceToFirstCorner)
+        
+        closestCorner = cornersLeft[cornerIndex]
+        cornersLeft.remove(closestCorner)
+
+        totalDistanceHeuristic += minDistanceToFirstCorner
+        currentPosition = closestCorner
+    
+
+    return totalDistanceHeuristic # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -487,63 +476,69 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    walls = set(problem.walls.asList())
-    #position, foodGrid = state
-    x, y = position
-    foodGrid = foodGrid.asList()
-    if foodGrid:
-        min_coord = min([p for p in foodGrid], key=lambda point: abs(point[0]-x)+abs(point[1]-y))
-        distance = abs(min_coord[0]-x)+abs(min_coord[1]-y)
+    foodGridList = foodGrid.asList()
+    numPelletsLeft = len(foodGridList)
+    
+    diagonalDistance = 0
+    totalDistanceHeuristic = 0
+    bestSolutionDistance = 0
+    corners = []
+    if(numPelletsLeft>=2):
+        first,last = foodGridList[0],foodGridList[numPelletsLeft-1]
+        second,third = first,last
+        for pellet in foodGridList:
+            if(pellet[0] == first[0]):
+                second = pellet
+            if(pellet[0] != first[0]):
+                break
+        for pellet in foodGridList:
+            if(pellet[1] == first[1]):
+                third = pellet
+        cornersLeft = [first,second,third,last]
+        corners = [first,second,third,last]
+        currentPosition = position
+        while(len(cornersLeft) != 0):
+            distances = [util.manhattanDistance(currentPosition,cornerLeft) for cornerLeft in cornersLeft]
+            minDistanceToFirstCorner = min(distances)
+            cornerIndex = distances.index(minDistanceToFirstCorner)
 
-        if len(foodGrid) == 1:
-            return distance
+            closestCorner = cornersLeft[cornerIndex]
+            cornersLeft.remove(closestCorner)
 
-        # check walls
-        wall_cost = 0
-        min_x, max_x = sorted([min_coord[0], x])
-        min_y, max_y = sorted([min_coord[1], y])
-        if min_x == max_x:
-            wall_cost = len([1 for w_x, w_y in walls if w_x == min_x and min_y <= w_y <= max_y])*2
-        elif min_y == max_y:
-            wall_cost = len([1 for w_x, w_y in walls if w_y == min_y and min_x <= w_x <= max_x])*2
-        else:
-            possible_x = set()
-            possible_y = set()
-            for e_x in range(min_x, max_x+1):
-                for e_y in range(min_y, max_y+1):
-                    if (e_x, e_y) not in walls:
-                        possible_x.add(e_x)
-                        possible_y.add(e_y)
-            if len(possible_x) != max_x+1-min_x:
-                wall_cost += 2
-            if len(possible_y) != max_y+1-min_y:
-                wall_cost += 2
-
-        # get max distance between further points
-        min_x_c = min(foodGrid, key=lambda point: point[0])[0]
-        max_x_c = max(foodGrid, key=lambda point: point[0])[0]
-        min_y_c = min(foodGrid, key=lambda point: point[1])[1]
-        max_y_c = max(foodGrid, key=lambda point: point[1])[1]
-        corners = {(min_x_c, min_y_c), (min_x_c, max_y_c), (max_x_c, min_y_c), (max_x_c, max_y_c)}
-        dists = []
-        for corner in corners:
-            max_dist_x = max([abs(p[0]-corner[0]) for p in foodGrid if p[1] == corner[1]])
-            max_dist_y = max([abs(p[1]-corner[1]) for p in foodGrid if p[0] == corner[0]])
-            dists.append(max_dist_x + max_dist_y)
-
-        # add total food count left
-        total_food = 0
-        for x, y in foodGrid:
-            if x in (max_x_c, min_x_c) or y in (min_y_c, max_y_c):
-                continue
-            total_food += 1
-
-        return max(dists) + distance + wall_cost + total_food
-    return 0
+            totalDistanceHeuristic += minDistanceToFirstCorner
+            currentPosition = closestCorner  
+        
+        
+        #cornersProblem = CornersFoodProblem(problem.startingGameState,[first,second,third,last])
+        #bestSolutionDistance = len(search.aStarSearch(cornersProblem, cornersHeuristic))
+        #print numPelletsLeft,diagonalDistance,totalDistanceHeuristic,bestSolutionDistance
+        
+        
+        #distanceBetweenTwo = util.manhattanDistance(first,last)
+        #distanceToCloser = min(util.manhattanDistance(position,first),util.manhattanDistance(position,last))
+        #diagonalDistance = distanceBetweenTwo+distanceToCloser
     
     
+    allPositions = corners
+    allPositions.append(position)
+    for firstPosition in allPositions:
+        for secondPosition in allPositions:
+            if((firstPosition,secondPosition) in problem.heuristicInfo):
+                searchSolution = problem.heuristicInfo[firstPosition,secondPosition]
+            else:    
+                distanceProblem = PositionSearchProblem(problem.startingGameState,goal = firstPosition, start = secondPosition,warn=False)
+                searchSolution = len(search.aStarSearch(distanceProblem,manhattanHeuristic))
+            bestSolutionDistance = max(bestSolutionDistance,searchSolution)
+            problem.heuristicInfo[firstPosition,secondPosition] = problem.heuristicInfo[secondPosition,firstPosition] = searchSolution
     
     
+    #distances = [util.manhattanDistance(position,pelletPosition) for pelletPosition in foodGridList]
+    #farthestPelletDistance = 0 if len(distances) == 0 else max(distances)
+    
+
+    
+
+    return max(numPelletsLeft,diagonalDistance,totalDistanceHeuristic,bestSolutionDistance)
     
     
     
