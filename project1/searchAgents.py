@@ -367,7 +367,7 @@ def cornersHeuristic(state, problem):
     curPos = state[1]
     cornersVisited = state[0]
     cornersLeft = []
-    distres = 0
+    #distres = 0
     for i in range(len(corners)):
         if not cornersVisited[i]:
             cornersLeft.append(corners[i])
@@ -380,7 +380,8 @@ def cornersHeuristic(state, problem):
         middle_corner = cornersLeft[index]
         cornersLeft.remove(middle_corner)
         
-        res+=minDist   
+        res+=minDist  
+        curPos = middle_corner 
     
 
     return res# Default to trivial solution
