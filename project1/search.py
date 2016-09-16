@@ -177,6 +177,7 @@ def uniformCostSearch(problem):
             if newstate not in visited:
                 fringe.push((newstate,path+[newpath]),cost+problem.getCostOfActions(path))
                 visited.append(newstate)
+        return None
                 
                 
                  
