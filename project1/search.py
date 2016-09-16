@@ -147,39 +147,26 @@ def uniformCostSearch(problem):
     "Search the node of least total cost first. "
     "*** YOUR CODE HERE ***"
     #util.raiseNotDefined()
-    from util import PriorityQueue
-    start = problem.getStartState()
-    visited = []
-    fringe = PriorityQueue()
-    path=[]
-    fringe.push((start,path),0)
-    
-    #if(problem.isGoalState(start)):
-     #   return []
-    
-    while not fringe.isEmpty():
-        state,path = fringe.pop()
-        
+    visited = set()
+    p_queue = util.PriorityQueue()
+    p_queue.push((problem.getStartState(), []), 0)
+
+    while not p_queue.isEmpty():
+        state, actions = p_queue.pop()
+
         if state in visited:
             continue
-            
-            
-        visited.append(state)
-                       
-            
+
+        visited.add(state)
+
         if problem.isGoalState(state):
-            return path
-        
-        
-        
-        
-        #if state not in visited:
-        #   visited.append(state)
-        for newstate,newpath,cost in problem.getSuccessors(state):
-            if newstate not in visited:
-                fringe.push((newstate,path+[newpath]),cost+problem.getCostOfActions(path))
-                visited.append(newstate)
-        #return None
+            return actions
+
+        for successor, action, stepCost in problem.getSuccessors(state):
+            if successor not in visited:
+                p_queue.push(
+                    (successor, actions + [action]),
+                    stepCost + problem.getCostOfActions(actions))
                 
                 
                  
