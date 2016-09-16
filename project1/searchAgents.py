@@ -475,35 +475,25 @@ def foodHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     
     
-    x,y = position
-    foodLeft = len(foodGrid.asList())
-    if(foodLeft==0):
+    def md( dest, source=state[0] ):
+        return abs(dest[0]-source[0]) + abs(dest[1]-source[1])
+
+    "If the food grid is empty, we're done so return 0 as required"
+    if not foodGrid.asList():
         return 0
+
+    "If there is only 1 pellet left, just go straight there"
+    if len(foodGrid.asList()) == 1:
+        return mazeDistance(state[0], foodGrid.asList()[0], problem.startingGameState)
     
-    stateDistres=0
-    stateDist=0
-    
-    #heuristic = min(map( md, foodGrid.asList()))
-    
-    for f in foodGrid.asList():
-        stateDist = abs(position[0]-f[0])+abs(position[0]-f[1])
-        
-        stateDistres=min(stateDist,stateDistres)
-    
-    foodDist=0
-    foodDistres=0
-    for firstFood in foodGrid.asList():
-        for secondFood in foodGrid.asList():
-            if(firstFood,secondFood) in problem.heuristicInfo:
-                foodDist = problem.heuristicInfo[(firstFood,secondFood)]
-            else:
-                problem.heuristicInfo[(firstFood,secondFood)]=mazeDistance(firstFood, secondFood, problem.startingGameState)
-            
-            problem.heuristicInfo[(secondFood,firstFood)]=problem.heuristicInfo[(firstFood,secondFood)]
-            foodDistres = max(foodDistres,foodDist)
-            
-    
-    return stateDistres+foodDistres
+    "Otherwise, first find the nearest dot to Sir PacMan, then find the maximum"
+    "of all the distances between all combinations of pellets. " 
+    heuristic = min(map( md, foodGrid.asList()))
+    maxDistanceBetweenDots = 0
+    for dot1 in foodGrid.asList():
+        for dot2 in foodGrid.asList():
+            maxDistanceBetweenDots = max(maxDistanceBetweenDots, md(dot1, dot2))
+    return heuristic + maxDistanceBetweenDots
     
     
     
