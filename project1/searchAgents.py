@@ -277,7 +277,7 @@ class CornersProblem(search.SearchProblem):
 
         "*** YOUR CODE HERE ***"
         self.visitedcorners=(False, False, False, False)
-        self.startingState = (self.visitedcorners, startingGameState.getPacmanPosition())
+        self.startingState = (self.visitedcorners, startingGameState.getPacmanPosition(),self.corners)
         #self.startingState = (False, False, False, False,self.startingPosition)
 
     def getStartState(self):
@@ -363,13 +363,38 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    x,y = state[1]
-    #distList = []
-    max_distance = 0
-    for corner in corners:
-        distance = abs(x-corner[0])+abs(y-corner[1])
-        if distance>max_distance:
-            max_distance=distance
+    distance = 0
+    cornersLeft = list(state[2])
+    pacman = state[1]
+    closest = 0
+    cornersList = []
+    minI = 0
+    distance_to_nearest = 0
+    total = 0
+    
+    if len(cornersLeft) > 0:
+        for i in range(len(cornersLeft)):
+            corner = cornersLeft[i]
+            cornersList.append(abs(pacman[0] - corner[0]) + abs(pacman[1] - corner[1]))
+        distance_to_nearest = min(cornersList)      
+        minI = cornersList.index(distance_to_nearest)
+        closest = cornersLeft[minI]
+      
+        cornersLeft.remove(closest)
+        while len(cornersLeft) > 0:
+          distanceList = []
+          xy1 = closest
+          for i in range(len(cornersLeft)):
+              xy2 = cornersLeft[i]
+              distanceList.append(abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1]))
+          closest2 = min(distanceList)
+          minI = distanceList.index(closest2)
+          closest = cornersLeft[minI]
+          cornersLeft.remove(closest)
+          
+          total = total + closest2
+        distance = distance_to_nearest + total
+      
     return distance # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
