@@ -479,8 +479,6 @@ def foodHeuristic(state, problem):
     foodLeft = len(foodGrid.asList())
     if(foodLeft==0):
         return 0
-    if(foodLeft==1):
-        return mazeDistance(position, foodGrid.asList()[0], problem.startingGameState)
     
     stateDistres=0
     stateDist=0
