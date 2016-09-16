@@ -209,16 +209,17 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     
     while not fringe.isEmpty():
         state,path = fringe.pop()
+        
+        if state in visited:
+            continue
+            
         if problem.isGoalState(state):
             return path
+                      
         visited.append(state)
-        
-        if state not in visited:
-            visited.append(state)
         for newstate,newpath,cost in problem.getSuccessors(state):
             if newstate not in visited:
                 fringe.push((newstate,path+[newpath]),cost+problem.getCostOfActions(path)+heuristic(newstate,problem))
-                visited.append(newstate)
     
 
 
