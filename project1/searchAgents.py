@@ -363,28 +363,28 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    totalDistanceHeuristic = 0
-    
-    currentPosition = state[1]
+    res = 0
+    curPos = state[1]
     cornersVisited = state[0]
     cornersLeft = []
+    distres = 0
     for i in range(len(corners)):
         if not cornersVisited[i]:
             cornersLeft.append(corners[i])
     
-    while(len(cornersLeft) != 0):
-        distances = [util.manhattanDistance(currentPosition,cornerLeft) for cornerLeft in cornersLeft]
-        minDistanceToFirstCorner = min(distances)
-        cornerIndex = distances.index(minDistanceToFirstCorner)
+    while(len(cornersLeft)!=0): 
+        for corner in cornersLeft:
+            dist = util.manhattanDistance(curPos,corner)
+            if(dist>distres):
+                distres = dist
+                cornerCloest = corner
         
-        closestCorner = cornersLeft[cornerIndex]
-        cornersLeft.remove(closestCorner)
-
-        totalDistanceHeuristic += minDistanceToFirstCorner
-        currentPosition = closestCorner
+        cornersLeft.remove(cornerCloest)
+        res += distres
+        curPos = cornerCloest
     
 
-    return totalDistanceHeuristic # Default to trivial solution
+    return res # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -476,69 +476,25 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    foodGridList = foodGrid.asList()
-    numPelletsLeft = len(foodGridList)
-    
-    diagonalDistance = 0
-    totalDistanceHeuristic = 0
-    bestSolutionDistance = 0
-    corners = []
-    if(numPelletsLeft>=2):
-        first,last = foodGridList[0],foodGridList[numPelletsLeft-1]
-        second,third = first,last
-        for pellet in foodGridList:
-            if(pellet[0] == first[0]):
-                second = pellet
-            if(pellet[0] != first[0]):
-                break
-        for pellet in foodGridList:
-            if(pellet[1] == first[1]):
-                third = pellet
-        cornersLeft = [first,second,third,last]
-        corners = [first,second,third,last]
-        currentPosition = position
-        while(len(cornersLeft) != 0):
-            distances = [util.manhattanDistance(currentPosition,cornerLeft) for cornerLeft in cornersLeft]
-            minDistanceToFirstCorner = min(distances)
-            cornerIndex = distances.index(minDistanceToFirstCorner)
+    def md( dest, source=state[0] ):
+        return abs(dest[0]-source[0]) + abs(dest[1]-source[1])
 
-            closestCorner = cornersLeft[cornerIndex]
-            cornersLeft.remove(closestCorner)
+    "If the food grid is empty, we're done so return 0 as required"
+    if not foodGrid.asList():
+        return 0
 
-            totalDistanceHeuristic += minDistanceToFirstCorner
-            currentPosition = closestCorner  
-        
-        
-        #cornersProblem = CornersFoodProblem(problem.startingGameState,[first,second,third,last])
-        #bestSolutionDistance = len(search.aStarSearch(cornersProblem, cornersHeuristic))
-        #print numPelletsLeft,diagonalDistance,totalDistanceHeuristic,bestSolutionDistance
-        
-        
-        #distanceBetweenTwo = util.manhattanDistance(first,last)
-        #distanceToCloser = min(util.manhattanDistance(position,first),util.manhattanDistance(position,last))
-        #diagonalDistance = distanceBetweenTwo+distanceToCloser
+    "If there is only 1 pellet left, just go straight there"
+    if len(foodGrid.asList()) == 1:
+        return mazeDistance(state[0], foodGrid.asList()[0], problem.startingGameState)
     
-    
-    allPositions = corners
-    allPositions.append(position)
-    for firstPosition in allPositions:
-        for secondPosition in allPositions:
-            if((firstPosition,secondPosition) in problem.heuristicInfo):
-                searchSolution = problem.heuristicInfo[firstPosition,secondPosition]
-            else:    
-                distanceProblem = PositionSearchProblem(problem.startingGameState,goal = firstPosition, start = secondPosition,warn=False)
-                searchSolution = len(search.aStarSearch(distanceProblem,manhattanHeuristic))
-            bestSolutionDistance = max(bestSolutionDistance,searchSolution)
-            problem.heuristicInfo[firstPosition,secondPosition] = problem.heuristicInfo[secondPosition,firstPosition] = searchSolution
-    
-    
-    #distances = [util.manhattanDistance(position,pelletPosition) for pelletPosition in foodGridList]
-    #farthestPelletDistance = 0 if len(distances) == 0 else max(distances)
-    
-
-    
-
-    return max(numPelletsLeft,diagonalDistance,totalDistanceHeuristic,bestSolutionDistance)
+    "Otherwise, first find the nearest dot to Sir PacMan, then find the maximum"
+    "of all the distances between all combinations of pellets. " 
+    heuristic = min(map( md, foodGrid.asList()))
+    maxDistanceBetweenDots = 0
+    for dot1 in foodGrid.asList():
+        for dot2 in foodGrid.asList():
+            maxDistanceBetweenDots = max(maxDistanceBetweenDots, md(dot1, dot2))
+    return heuristic + maxDistanceBetweenDots
     
     
     
