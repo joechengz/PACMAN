@@ -154,8 +154,8 @@ def uniformCostSearch(problem):
     path=[]
     fringe.push((start,path),0)
     
-    if(problem.isGoalState(start)):
-        return []
+    #if(problem.isGoalState(start)):
+     #   return []
     
     while not fringe.isEmpty():
         state,path = fringe.pop()
