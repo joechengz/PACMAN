@@ -476,27 +476,55 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    def md( dest, source=state[0] ):
-        return abs(dest[0]-source[0]) + abs(dest[1]-source[1])
+    walls = set(problem.walls.asList())
+    position, foodGrid = state
+    x, y = position
+    foodGrid = foodGrid.asList()
+    if foodGrid:
+        min_coord = min([p for p in foodGrid], key=lambda point: abs(point[0]-x)+abs(point[1]-y))
+        distance = abs(min_coord[0]-x)+abs(min_coord[1]-y)
 
-    "If the food grid is empty, we're done so return 0 as required"
-    if not foodGrid.asList():
-        return 0
+        if len(foodGrid) == 1:
+            return distance
 
-    "If there is only 1 pellet left, just go straight there"
-    if len(foodGrid.asList()) == 1:
-        return mazeDistance(state[0], foodGrid.asList()[0], problem.startingGameState)
-    
-    "Otherwise, first find the nearest dot to Sir PacMan, then find the maximum"
-    "of all the distances between all combinations of pellets. " 
-    heuristic = min(map( md, foodGrid.asList()))
-    maxDistanceBetweenDots = 0
-    for dot1 in foodGrid.asList():
-        for dot2 in foodGrid.asList():
-            maxDistanceBetweenDots = max(maxDistanceBetweenDots, md(dot1, dot2))
-            
-    total_food = len(foodGrid.asList())
-    return heuristic + maxDistanceBetweenDots+total_food
+        # check walls
+        wall_cost = 0
+        min_x, max_x = sorted([min_coord[0], x])
+        min_y, max_y = sorted([min_coord[1], y])
+        if min_x == max_x:
+            wall_cost = len([1 for w_x, w_y in walls if w_x == min_x and min_y <= w_y <= max_y])*2
+        elif min_y == max_y:
+            wall_cost = len([1 for w_x, w_y in walls if w_y == min_y and min_x <= w_x <= max_x])*2
+        else:
+            possible_x = set()
+            possible_y = set()
+            for e_x in range(min_x, max_x+1):
+                for e_y in range(min_y, max_y+1):
+                    if (e_x, e_y) not in walls:
+                        possible_x.add(e_x)
+                        possible_y.add(e_y)
+            if len(possible_x) != max_x+1-min_x:
+                wall_cost += 2
+            if len(possible_y) != max_y+1-min_y:
+                wall_cost += 2
+
+        # get max distance between further points
+        min_x_c = min(foodGrid, key=lambda point: point[0])[0]
+        max_x_c = max(foodGrid, key=lambda point: point[0])[0]
+        min_y_c = min(foodGrid, key=lambda point: point[1])[1]
+        max_y_c = max(foodGrid, key=lambda point: point[1])[1]
+        corners = {(min_x_c, min_y_c), (min_x_c, max_y_c), (max_x_c, min_y_c), (max_x_c, max_y_c)}
+        dists = []
+        for corner in corners:
+            max_dist_x = max([abs(p[0]-corner[0]) for p in foodGrid if p[1] == corner[1]])
+            max_dist_y = max([abs(p[1]-corner[1]) for p in foodGrid if p[0] == corner[0]])
+            dists.append(max_dist_x + max_dist_y)
+
+        # add total food count left
+        total_food = len(foodGrid)
+
+        return max(dists) + distance + wall_cost + total_food
+    return 0
     
     
     
