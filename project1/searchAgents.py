@@ -521,7 +521,11 @@ def foodHeuristic(state, problem):
             dists.append(max_dist_x + max_dist_y)
 
         # add total food count left
-        total_food = len(foodGrid)
+        total_food = 0
+        for x, y in foodGrid:
+            if x in (max_x_c, min_x_c) or y in (min_y_c, max_y_c):
+                continue
+            total_food += 1
 
         return max(dists) + distance + wall_cost + total_food
     return 0
