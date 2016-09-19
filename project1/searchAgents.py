@@ -476,59 +476,40 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    walls = set(problem.walls.asList())
-    position, foodGrid = state
-    x, y = position
-    foodGrid = foodGrid.asList()
-    if foodGrid:
-        min_coord = min([p for p in foodGrid], key=lambda point: abs(point[0]-x)+abs(point[1]-y))
-        distance = abs(min_coord[0]-x)+abs(min_coord[1]-y)
-
-        if len(foodGrid) == 1:
-            return distance
-
-        # check walls
-        wall_cost = 0
-        min_x, max_x = sorted([min_coord[0], x])
-        min_y, max_y = sorted([min_coord[1], y])
-        if min_x == max_x:
-            wall_cost = len([1 for w_x, w_y in walls if w_x == min_x and min_y <= w_y <= max_y])*2
-        elif min_y == max_y:
-            wall_cost = len([1 for w_x, w_y in walls if w_y == min_y and min_x <= w_x <= max_x])*2
+    import util
+    p=state[0]
+    foodGrid = state[1]
+    
+    foods=foodGrid.asList()
+    foodDistance=0
+    stateToFood=0
+    #print foods
+    for f1 in foods:
+        for f2 in foods:
+            if (f1,f2) in problem.heuristicInfo:
+                if problem.heuristicInfo[(f1,f2)]>foodDistance:
+                    foodDistance=problem.heuristicInfo[(f1,f2)]
+            elif (f2,f1) in problem.heuristicInfo:
+                if problem.heuristicInfo[(f2,f1)]>foodDistance:
+                    foodDistance=problem.heuristicInfo[(f2,f1)]
+            else:
+                #print (f1,f2)
+                problem.heuristicInfo[(f1,f2)]=mazeDistance(f1,f2,problem.startingGameState)
+                if problem.heuristicInfo[(f1,f2)]>foodDistance:
+                    foodDistance=problem.heuristicInfo[(f1,f2)]
+    
+    for f in foods:
+        if (p,f) in problem.heuristicInfo:
+            if stateToFood ==0 or stateToFood>problem.heuristicInfo[(p,f)]:
+                stateToFood=problem.heuristicInfo[(p,f)]
+        elif (f,p) in problem.heuristicInfo:
+            if stateToFood ==0 or stateToFood >problem.heuristicInfo[(f,p)]:
+                stateToFood=problem.heuristicInfo[(f,p)]
         else:
-            possible_x = set()
-            possible_y = set()
-            for e_x in range(min_x, max_x+1):
-                for e_y in range(min_y, max_y+1):
-                    if (e_x, e_y) not in walls:
-                        possible_x.add(e_x)
-                        possible_y.add(e_y)
-            if len(possible_x) != max_x+1-min_x:
-                wall_cost += 2
-            if len(possible_y) != max_y+1-min_y:
-                wall_cost += 2
-
-        # get max distance between further points
-        min_x_c = min(foodGrid, key=lambda point: point[0])[0]
-        max_x_c = max(foodGrid, key=lambda point: point[0])[0]
-        min_y_c = min(foodGrid, key=lambda point: point[1])[1]
-        max_y_c = max(foodGrid, key=lambda point: point[1])[1]
-        corners = {(min_x_c, min_y_c), (min_x_c, max_y_c), (max_x_c, min_y_c), (max_x_c, max_y_c)}
-        dists = []
-        for corner in corners:
-            max_dist_x = max([abs(p[0]-corner[0]) for p in foodGrid if p[1] == corner[1]])
-            max_dist_y = max([abs(p[1]-corner[1]) for p in foodGrid if p[0] == corner[0]])
-            dists.append(max_dist_x + max_dist_y)
-
-        # add total food count left
-        total_food = 0
-        for x, y in foodGrid:
-            if x in (max_x_c, min_x_c) or y in (min_y_c, max_y_c):
-                continue
-            total_food += 1
-
-        return max(dists) + distance + wall_cost + total_food
-    return 0
+            problem.heuristicInfo[(p,f)]=mazeDistance(p,f,problem.startingGameState)
+            if stateToFood==0 or stateToFood>problem.heuristicInfo[(p,f)]:
+                stateToFood=problem.heuristicInfo[(p,f)]
+    return foodDistance+stateToFood
     
     
     
