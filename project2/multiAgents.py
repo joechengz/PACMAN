@@ -76,6 +76,9 @@ class ReflexAgent(Agent):
     minFoodDistance = 99999
     for food in newFood.asList():
         minFoodDistance = min(minFoodDistance,manhattanDistance(newPos,food))
+    #if there are all scared ghost
+    if minGhostDistance==99999:
+        minGhostDistance=0
     #score for scared-ghost
     for newghost in newGhostStates:
         ghostdist = manhattanDistance(newPos,newghost.getPosition())
