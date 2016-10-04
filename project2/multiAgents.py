@@ -305,7 +305,7 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
   """
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  #util.raiseNotDefined()
   from util import manhattanDistance
   newPos = currentGameState.getPacmanPosition()
   newFood = currentGameState.getFood()
