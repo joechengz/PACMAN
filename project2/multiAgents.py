@@ -306,6 +306,43 @@ def betterEvaluationFunction(currentGameState):
   """
   "*** YOUR CODE HERE ***"
   util.raiseNotDefined()
+  from util import manhattanDistance
+  newPos = currentGameState.getPacmanPosition()
+  newFood = currentGameState.getFood()
+  newGhostStates = currentGameState.getGhostStates()
+  newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+  
+  
+  score = currentGameState.getScore()
+  ghostDistances = [manhattanDistance(newPos,newghost.getPosition()) for newghost in newGhostStates]
+  
+  oldfoodnum = currentGameState.getNumFood()
+  
+  #score for going to near foods
+  nearFoodDist = 100
+  for i, item in enumerate(newFood):
+      for j, foodItem in enumerate(item):
+          nearFoodDist = min(nearFoodDist, manhattanDistance(newPos, (i, j)) if foodItem else 100)
+  nearfoodscore = 1.0/nearFoodDist       
+  #score for ghost
+  ghostscore = 0
+  for index in range(len(ghostDistances)):
+      if newScaredTimes[index]<1:
+          if ghostDistances[index]<3:
+              ghostscore+=-20+ghostDistances[index]**4
+          else:
+              ghostscore+=-1.0/ghostDistances[index]
+  
+  #score for pelets
+  pelets = currentGameState.getCapsules()
+  nearpeletedist = min(100,[manhattanDistance(newPos,pelet) for pelet in pelets])
+  nearpeletescore = 1.0/nearpeletedist
+  peletenum = len(pelets)
+  
+  if all((t>0 for t in newScaredTimes)):
+      return score+nearfoodscore-2*ghostscore +3*nearpeletescore -1.5*oldfoodnum
+  else:
+      return score+nearfoodscore+2*ghostscore +3*nearpeletescore -1.5*oldfoodnum-8*peletenum
 
 # Abbreviation
 better = betterEvaluationFunction
