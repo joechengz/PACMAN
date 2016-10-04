@@ -241,7 +241,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     minval = (None,99999)
     for action in actions:
         successor = gameState.generateSuccessor(depth%gameState.getNumAgents(),action)
-        tmpval = self.getaction_helper(depth+1, gameState, alpha, beta)
+        tmpval = self.getaction_helper(depth+1, successor, alpha, beta)
         if tmpval[1]<minval[1]:
             minval = (action,tmpval[1])
         if minval[1]<alpha:
